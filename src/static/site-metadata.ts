@@ -1,8 +1,8 @@
 interface ISiteMetadataResult {
   siteTitle: 'Run Page';
-  siteUrl: string;
-  description: string;
-  logo: string;
+  siteUrl: 'https://running-page-beige.vercel.app/';
+  description: '个人运动数据';
+  logo: 'https://raw.githubusercontent.com/canbaodexieshen/FoodPhoto/main/img/logo.jpg';
   navLinks: {
     name: string;
     url: string;
