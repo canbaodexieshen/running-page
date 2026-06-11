@@ -86,7 +86,11 @@ export const useTheme = () => {
   // Initialize theme from localStorage or default to dark
   const [themeState, setThemeState] = useState<Theme>(() => {
     if (typeof window === 'undefined') return 'dark';
-    return (localStorage.getItem('theme') as Theme) || 'dark';
+    const saved = localStorage.getItem('theme') as Theme;
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
   });
 
   /**
