@@ -8,11 +8,11 @@ export const THEME_CHANGE_EVENT = 'theme-change';
 
 const getCurrentThemeSnapshot = () => {
   if (typeof window === 'undefined') return 'dark';
-  return (
-    document.documentElement.getAttribute('data-theme') ||
-    localStorage.getItem('theme') ||
-    'dark'
-  );
+  const saved = localStorage.getItem('theme');
+  if (saved) return saved;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
 };
 
 const subscribeToThemeChanges = (onStoreChange: () => void) => {
@@ -83,7 +83,7 @@ export const useMapTheme = () => {
  * @returns Object with current theme and function to change theme
  */
 export const useTheme = () => {
-  // Initialize theme from localStorage or default to dark
+  // Initialize theme: use saved preference, otherwise follow system
   const [themeState, setThemeState] = useState<Theme>(() => {
     if (typeof window === 'undefined') return 'dark';
     const saved = localStorage.getItem('theme') as Theme;
@@ -98,6 +98,9 @@ export const useTheme = () => {
    */
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
+    // Mark as manually overridden
+    localStorage.setItem('theme', newTheme);
+    localStorage.setItem('theme-manual', 'true');
 
     // Dispatch custom event for theme change
     const event = new CustomEvent(THEME_CHANGE_EVENT, {
@@ -106,13 +109,30 @@ export const useTheme = () => {
     window.dispatchEvent(event);
   }, []);
 
-  // Apply theme changes to DOM and localStorage
+  // Listen for system theme changes and auto-follow
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      const newTheme = e.matches ? 'dark' : 'light';
+      setThemeState(newTheme);
+      localStorage.setItem('theme', newTheme);
+      // Clear manual override when system changes
+      localStorage.removeItem('theme-manual');
+
+      const event = new CustomEvent(THEME_CHANGE_EVENT, {
+        detail: { theme: newTheme },
+      });
+      window.dispatchEvent(event);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  // Apply theme changes to DOM
   useEffect(() => {
     const root = window.document.documentElement;
-
-    // Set attribute and save to localStorage for both themes
     root.setAttribute('data-theme', themeState);
-    localStorage.setItem('theme', themeState);
   }, [themeState]);
 
   return {
