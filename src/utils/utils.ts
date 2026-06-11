@@ -193,7 +193,7 @@ const intComma = (x = '') => {
 };
 
 const getActivitySport = (act: Activity): string => {
-  if (act.type === 'Run') {
+  if (act.type === 'Run' || act.type === 'running') {
     if (act.subtype === 'generic') {
       const runDistance = act.distance / 1000;
       if (runDistance > 20 && runDistance < 40) {
@@ -206,12 +206,14 @@ const getActivitySport = (act: Activity): string => {
     else if (act.subtype === 'treadmill')
       return ACTIVITY_TYPES.RUN_TREADMILL_TITLE;
     else return ACTIVITY_TYPES.RUN_GENERIC_TITLE;
-  } else if (act.type === 'hiking') {
+  } else if (act.type === 'hiking' || act.type === 'Hike') {
     return ACTIVITY_TYPES.HIKING_TITLE;
-  } else if (act.type === 'cycling') {
+  } else if (act.type === 'cycling' || act.type === 'Ride') {
     return ACTIVITY_TYPES.CYCLING_TITLE;
-  } else if (act.type === 'walking') {
+  } else if (act.type === 'walking' || act.type === 'Walk') {
     return ACTIVITY_TYPES.WALKING_TITLE;
+  } else if (act.type === 'swimming' || act.type === 'Swim') {
+    return ACTIVITY_TYPES.SWIMMING_TITLE;
   }
   // if act.type contains 'skiing'
   else if (act.type.includes('skiing')) {
@@ -233,7 +235,12 @@ const titleForRun = (run: Activity): string => {
       return `${city} ${activity_sport}`;
     }
   }
-  // 3. use time+length if location or type is not available
+  // 2.5. for non-running activities, return the sport type directly
+  if (run.type !== 'Run' && run.type !== 'running') {
+    const activity_sport = getActivitySport(run);
+    if (activity_sport) return activity_sport;
+  }
+  // 3. use time+length if location or type is not available (running only)
   const runDistance = run.distance / 1000;
   const runHour = +run.start_date_local.slice(11, 13);
   if (runDistance > 20 && runDistance < 40) {
