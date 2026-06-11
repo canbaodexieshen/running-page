@@ -1,5 +1,5 @@
 interface ISiteMetadataResult {
-  siteTitle: string;
+  siteTitle: 'Run Page';
   siteUrl: string;
   description: string;
   logo: string;
