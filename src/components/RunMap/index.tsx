@@ -452,7 +452,7 @@ const RunMap = ({
       style={style}
       mapStyle={mapStyle}
       ref={mapRefCallback}
-      cooperativeGestures={isTouchDevice()}
+      cooperativeGestures={false}
       mapboxAccessToken={mapboxAccessToken}
     >
       {mapError && (
